@@ -1,4 +1,4 @@
-// Local Storage Hook
+// Custom Local Storage Hook
 
 import { useEffect, useState } from "react";
 
@@ -19,5 +19,6 @@ export function useLocalStorage<T>(key: string, initialValue: T | (() => T)) {
   useEffect(() => {
     localStorage.setItem(key, JSON.stringify(value));
   }, [value, key]);
+
   return [value, setValue] as [T, typeof setValue];
 }
