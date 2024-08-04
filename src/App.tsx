@@ -8,6 +8,7 @@ import { v4 as uuidV4 } from "uuid";
 import NoteList from "./componenets/NoteList";
 import NoteLayout from "./componenets/NoteLayout";
 import { Note } from "./componenets/Note";
+import EditNote from "./componenets/EditNote";
 
 // Adds id to exsiting NoteData
 export type Note = {
@@ -34,6 +35,7 @@ export type RawNoteData = {
   markdown: string;
   tagIds: string[];
 };
+
 function App() {
   const [notes, setNotes] = useLocalStorage<RawNote[]>("NOTES", []);
   const [tags, setTags] = useLocalStorage<Tag[]>("TAGS", []);
@@ -60,6 +62,24 @@ function App() {
     setTags((prev) => [...prev, tag]);
   }
 
+  function onUpdateNote(id: string, { tags, ...data }: NoteData) {
+    setNotes((prevNotes) => {
+      return prevNotes.map((note) => {
+        if (note.id === id) {
+          return { ...note, ...data, tagIds: tags.map((tag) => tag.id) };
+        } else {
+          return note;
+        }
+      });
+    });
+  }
+
+  function onDeleteNote(id: string) {
+    setNotes((prevNotes) => {
+      return prevNotes.filter((note) => note.id !== id);
+    });
+  }
+
   return (
     <Container className="my-4">
       <Routes>
@@ -79,8 +99,17 @@ function App() {
           }
         />
         <Route path="/:id" element={<NoteLayout notes={notesWithTags} />}>
-          <Route index element={<Note />} />
-          <Route path="edit" element={<h1>Edit</h1>} />
+          <Route index element={<Note onDelete={onDeleteNote} />} />
+          <Route
+            path="edit"
+            element={
+              <EditNote
+                onSubmit={onUpdateNote}
+                onAddTag={addTag}
+                availableTags={tags}
+              />
+            }
+          />
         </Route>
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
